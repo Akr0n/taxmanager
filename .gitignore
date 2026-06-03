@@ -480,3 +480,6 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# TaxManager publish/release outputs (rigenerati da publish.ps1 / dotnet publish)
+release/

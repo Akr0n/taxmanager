@@ -1,0 +1,47 @@
+{
+  "year": 2024,
+  "irpef": {
+    "brackets": [
+      { "upTo": 28000, "rate": 0.23 },
+      { "upTo": 50000, "rate": 0.35 },
+      { "upTo": 1000000000000, "rate": 0.43 }
+    ]
+  },
+  "employmentDeduction": {
+    "bands": [
+      { "incomeUpTo": 15000, "base": 1955, "taper": 0,    "taperFrom": 0,     "taperTo": 0 },
+      { "incomeUpTo": 28000, "base": 1910, "taper": 1190, "taperFrom": 15000, "taperTo": 28000 },
+      { "incomeUpTo": 50000, "base": 0,    "taper": 1910, "taperFrom": 28000, "taperTo": 50000 }
+    ],
+    "minAmount": 690
+  },
+  "treatmentBonus": { "incomeThreshold": 15000, "annualAmount": 1200 },
+  "employeeContributions": {
+    "private": { "rate": 0.0919, "additionalRate": 0.01, "additionalThreshold": 55008, "annualCeiling": 119650 },
+    "public":  { "rate": 0.0880, "additionalRate": 0.01, "additionalThreshold": 55008, "annualCeiling": 119650 }
+  },
+  "regionalSurtax": { "defaultRate": 0.0123, "minRate": 0, "maxRate": 0.0333 },
+  "municipalSurtax": { "defaultRate": 0.0060, "minRate": 0, "maxRate": 0.0090 },
+  "forfettario": {
+    "revenueLimit": 85000,
+    "substituteTaxRate": 0.15,
+    "startupReducedRate": 0.05,
+    "startupYears": 5,
+    "coefficients": [
+      { "sector": "Industrie alimentari e delle bevande", "atecoHint": "10-11", "coefficient": 0.40 },
+      { "sector": "Commercio all'ingrosso e al dettaglio", "atecoHint": "45 - 46.2/46.9 - 47.1/47.7 - 47.9", "coefficient": 0.40 },
+      { "sector": "Commercio ambulante di prodotti alimentari e bevande", "atecoHint": "47.81", "coefficient": 0.40 },
+      { "sector": "Commercio ambulante di altri prodotti", "atecoHint": "47.82 - 47.89", "coefficient": 0.54 },
+      { "sector": "Costruzioni e attivita immobiliari", "atecoHint": "41-42-43 - 68", "coefficient": 0.86 },
+      { "sector": "Intermediari del commercio", "atecoHint": "46.1", "coefficient": 0.62 },
+      { "sector": "Servizi di alloggio e ristorazione", "atecoHint": "55-56", "coefficient": 0.40 },
+      { "sector": "Attivita professionali, scientifiche, tecniche, sanitarie, istruzione, servizi finanziari/assicurativi", "atecoHint": "64-66 - 69-75 - 85 - 86-88", "coefficient": 0.78 },
+      { "sector": "Altre attivita economiche", "atecoHint": "altri codici ATECO", "coefficient": 0.67 }
+    ],
+    "contributions": {
+      "gestioneSeparataRate": 0.2607,
+      "artigiani":     { "minimale": 18415, "fixedContribution": 4427.04, "rateAboveMinimale": 0.25,   "reductionForfettario": 0.35 },
+      "commercianti":  { "minimale": 18415, "fixedContribution": 4515.43, "rateAboveMinimale": 0.2548, "reductionForfettario": 0.35 }
+    }
+  }
+}

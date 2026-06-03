@@ -1,0 +1,128 @@
+name: DEV - Test & Release .NET Application
+
+on:
+  push:
+    branches:
+      - develop
+
+permissions:
+  contents: write
+  pull-requests: read
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  test-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up .NET 10.0
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore TaxManager.slnx
+
+      - name: Build solution (Release)
+        run: dotnet build TaxManager.slnx --configuration Release --no-restore
+
+      - name: Run unit tests
+        run: dotnet test TaxManager.slnx --configuration Release --no-build --verbosity normal
+
+      - name: Publish application (win-x64, self-contained single-file)
+        run: |
+          dotnet publish src/TaxManager.App/TaxManager.App.csproj `
+            --configuration Release `
+            --runtime win-x64 `
+            --self-contained `
+            -p:PublishSingleFile=true `
+            -p:IncludeNativeLibrariesForSelfExtract=true `
+            -p:PublishReadyToRun=true `
+            --output ./publish
+
+      - name: Package release artifact (exe + dati)
+        run: |
+          # TaxManager ha dati esterni (rulesets/ e addizionali/) accanto all'exe:
+          # l'asset di release è uno ZIP completo, non il solo eseguibile.
+          Compress-Archive -Path ./publish/* -DestinationPath ./TaxManager-win-x64.zip -Force
+          Get-ChildItem ./publish
+
+      - name: Create release notes
+        run: |
+          "# TaxManager - Development Release"                 | Out-File RELEASE_NOTES.txt -Encoding utf8
+          ""                                                   | Out-File RELEASE_NOTES.txt -Append -Encoding utf8
+          "## Contenuto:"                                      | Out-File RELEASE_NOTES.txt -Append -Encoding utf8
+          "- TaxManager.exe (self-contained, win-x64)"         | Out-File RELEASE_NOTES.txt -Append -Encoding utf8
+          "- cartelle rulesets/ e addizionali/ (dati fiscali)" | Out-File RELEASE_NOTES.txt -Append -Encoding utf8
+          ""                                                   | Out-File RELEASE_NOTES.txt -Append -Encoding utf8
+          "## Build:"                                          | Out-File RELEASE_NOTES.txt -Append -Encoding utf8
+          "- .NET 10.0 - Windows x64 - eseguibile self-contained" | Out-File RELEASE_NOTES.txt -Append -Encoding utf8
+          ""                                                   | Out-File RELEASE_NOTES.txt -Append -Encoding utf8
+          "AVVISO: i risultati sono una STIMA; verificare su fonti ufficiali." | Out-File RELEASE_NOTES.txt -Append -Encoding utf8
+
+      - name: Get last dev tag and increment
+        id: version
+        run: |
+          git fetch --tags
+          $all_tags = git tag --list
+          $dev_tags = @($all_tags | Where-Object { $_ -match '^v(\d+)\.(\d+)\.(\d+)-dev$' })
+          if ($dev_tags.Count -eq 0) {
+            $new_version = "1.0.0"
+          } else {
+            $hi = @{major=0; minor=0; patch=0}
+            foreach ($tag in $dev_tags) {
+              if ($tag -match '^v(\d+)\.(\d+)\.(\d+)-dev$') {
+                $maj=[int]$matches[1]; $min=[int]$matches[2]; $pat=[int]$matches[3]
+                if (($maj -gt $hi.major) -or ($maj -eq $hi.major -and $min -gt $hi.minor) -or ($maj -eq $hi.major -and $min -eq $hi.minor -and $pat -gt $hi.patch)) {
+                  $hi.major=$maj; $hi.minor=$min; $hi.patch=$pat
+                }
+              }
+            }
+            $new_version = "$($hi.major).$($hi.minor).$($hi.patch + 1)"
+          }
+          $version_tag = "v$new_version-dev"
+          "NEWVERSION=$new_version" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "VERSION_TAG=$version_tag" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          Write-Output "New tag: $version_tag"
+
+      - name: Create and push tag
+        run: |
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git tag ${{ env.VERSION_TAG }}
+          git push origin ${{ env.VERSION_TAG }}
+
+      - name: Generate changelog
+        id: changelog
+        uses: mikepenz/release-changelog-builder-action@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          toTag: ${{ env.VERSION_TAG }}
+          configuration: |
+            {
+              "template": "#{{CHANGELOG}}\n\n**Full Changelog**: #{{RELEASE_DIFF}}",
+              "pr_template": "- #{{TITLE}} by @#{{AUTHOR}} in ##{{NUMBER}}"
+            }
+
+      - name: Create release with changelog and assets
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ env.VERSION_TAG }}
+          name: Release ${{ env.VERSION_TAG }}
+          body: ${{ steps.changelog.outputs.changelog }}
+          prerelease: true
+          draft: false
+          files: |
+            ./TaxManager-win-x64.zip
+            ./RELEASE_NOTES.txt
+            ./README.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

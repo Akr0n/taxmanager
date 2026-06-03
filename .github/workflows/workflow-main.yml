@@ -1,0 +1,109 @@
+name: PROD - Test & Release .NET Application
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: read
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  release-job:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check if the last commit is a merge from develop
+        run: |
+          $LAST_COMMIT = (git rev-parse HEAD).Trim()
+          $parts = (git rev-list --parents -n 1 $LAST_COMMIT).Split(" ")
+          if ($parts.Count -ne 3) {
+            Write-Output "Ultimo commit non è un merge da develop: stop."
+            exit 1
+          }
+          git fetch origin develop
+          $developSHA = (git rev-parse origin/develop).Trim()
+          if ($parts[1] -eq $developSHA -or $parts[2] -eq $developSHA) {
+            Write-Output "OK: merge da develop."
+          } else {
+            Write-Output "Il merge non proviene da develop: stop."
+            exit 1
+          }
+
+      - name: Set up .NET 10.0
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore TaxManager.slnx
+
+      - name: Build solution (Release)
+        run: dotnet build TaxManager.slnx --configuration Release --no-restore
+
+      - name: Run unit tests
+        run: dotnet test TaxManager.slnx --configuration Release --no-build --verbosity normal
+
+      - name: Publish application (win-x64, self-contained single-file)
+        run: |
+          dotnet publish src/TaxManager.App/TaxManager.App.csproj `
+            --configuration Release `
+            --runtime win-x64 `
+            --self-contained `
+            -p:PublishSingleFile=true `
+            -p:IncludeNativeLibrariesForSelfExtract=true `
+            -p:PublishReadyToRun=true `
+            --output ./publish
+
+      - name: Package release artifact (exe + dati)
+        run: Compress-Archive -Path ./publish/* -DestinationPath ./TaxManager-win-x64.zip -Force
+
+      - name: Create release notes
+        run: |
+          "# TaxManager - Production Release"                  | Out-File RELEASE_NOTES.txt -Encoding utf8
+          ""                                                   | Out-File RELEASE_NOTES.txt -Append -Encoding utf8
+          "Release stabile. Contiene TaxManager.exe (win-x64, self-contained) e i dati fiscali (rulesets/, addizionali/)." | Out-File RELEASE_NOTES.txt -Append -Encoding utf8
+
+      - name: Get last dev tag
+        run: |
+          git fetch --tags
+          $lastDevTag = git tag --list "v*-dev" | Sort-Object {[version]($_.TrimStart("v") -replace "-dev","")} -Descending | Select-Object -First 1
+          if (-not $lastDevTag) { Write-Error "Nessun tag -dev trovato"; exit 1 }
+          $releaseVersion = $lastDevTag -replace "-dev",""
+          "release_tag=$releaseVersion" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Create and push tag
+        run: |
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git tag ${{ env.release_tag }}
+          git push origin ${{ env.release_tag }}
+
+      - name: Generate changelog
+        id: changelog
+        uses: mikepenz/release-changelog-builder-action@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Release with changelog and assets
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ env.release_tag }}
+          name: Release ${{ env.release_tag }}
+          body: ${{ steps.changelog.outputs.changelog }}
+          files: |
+            ./TaxManager-win-x64.zip
+            ./RELEASE_NOTES.txt
+            ./README.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

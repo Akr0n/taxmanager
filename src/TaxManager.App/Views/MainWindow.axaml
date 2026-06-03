@@ -1,0 +1,198 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:TaxManager.App.ViewModels"
+        xmlns:views="clr-namespace:TaxManager.App.Views"
+        xmlns:models="clr-namespace:TaxManager.Application.Models;assembly=TaxManager.Application"
+        mc:Ignorable="d"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        x:Class="TaxManager.App.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Width="1180" Height="800" MinWidth="980" MinHeight="640"
+        WindowStartupLocation="CenterScreen"
+        Background="#0d1117"
+        Icon="avares://TaxManager/Assets/logo.ico"
+        Title="TaxManager — Calcolo imposte">
+
+  <DockPanel>
+
+    <!-- Header -->
+    <Border DockPanel.Dock="Top" Classes="chrome" BorderThickness="0,0,0,1" Padding="20,12">
+      <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+        <Image Source="avares://TaxManager/Assets/logo.png" Width="36" Height="36" />
+        <StackPanel Spacing="2" VerticalAlignment="Center">
+          <TextBlock Classes="pageTitle" Text="TaxManager" />
+          <TextBlock Classes="muted" Text="Calcolo imposte annue — dipendenti pubblici/privati e Partita IVA forfettaria" />
+        </StackPanel>
+      </StackPanel>
+    </Border>
+
+    <!-- Status bar -->
+    <Border DockPanel.Dock="Bottom" Classes="chrome" BorderThickness="0,1,0,0" Padding="16,9">
+      <TextBlock Classes="body" Text="{Binding StatusMessage}" />
+    </Border>
+
+    <TabControl>
+
+      <!-- ================= CALCOLO ================= -->
+      <TabItem Header="Calcolo">
+        <Grid RowDefinitions="Auto,*" Margin="24">
+
+          <Border Grid.Row="0" Classes="card">
+            <WrapPanel Orientation="Horizontal" ItemSpacing="16" LineSpacing="10">
+              <StackPanel Spacing="6">
+                <TextBlock Classes="fieldLabel" Text="Categoria contribuente" />
+                <ComboBox x:CompileBindings="False" Width="240"
+                          ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate><TextBlock Text="{Binding Converter={StaticResource EnumLabel}}" /></DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+              </StackPanel>
+
+              <StackPanel Spacing="6">
+                <TextBlock Classes="fieldLabel" Text="Anno fiscale" />
+                <ComboBox Width="120" ItemsSource="{Binding Years}" SelectedItem="{Binding SelectedYear}" />
+              </StackPanel>
+
+              <StackPanel Spacing="6">
+                <TextBlock Classes="fieldLabel" Text="Nome profilo (per salvataggio/storico)" />
+                <TextBox Width="240" Text="{Binding ProfileName}" Watermark="es. Mario Rossi 2025" />
+              </StackPanel>
+
+              <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom">
+                <Button Content="Salva profilo" Classes="secondary" Command="{Binding SaveProfileCommand}" />
+                <Button Content="Nuovo" Classes="secondary" Command="{Binding NewProfileCommand}" />
+              </StackPanel>
+            </WrapPanel>
+          </Border>
+
+          <Grid Grid.Row="1" ColumnDefinitions="410,*">
+            <Border Grid.Column="0" Classes="card" Margin="0,0,6,0">
+              <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <!-- Margini orizzontali simmetrici: contenuto centrato; la scrollbar auto-hide
+                     vive nel margine destro (ampio quanto la barra espansa) senza sovrapporsi. -->
+                <StackPanel Spacing="16" Margin="20,0,20,0">
+                  <ContentControl IsVisible="{Binding IsEmployee}">
+                    <views:EmployeeFormView DataContext="{Binding EmployeeForm}" />
+                  </ContentControl>
+                  <ContentControl IsVisible="{Binding IsForfettario}">
+                    <views:ForfettarioFormView DataContext="{Binding ForfettarioForm}" />
+                  </ContentControl>
+
+                  <Button Content="Calcola" Command="{Binding CalculateCommand}"
+                          Classes="primary" Height="44" FontSize="13" HorizontalAlignment="Stretch" />
+
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Content="Esporta TXT" Classes="secondary" Click="OnExportText" IsEnabled="{Binding HasResult}" />
+                    <Button Content="Esporta JSON" Classes="secondary" Click="OnExportJson" IsEnabled="{Binding HasResult}" />
+                  </StackPanel>
+                </StackPanel>
+              </ScrollViewer>
+            </Border>
+
+            <Panel Grid.Column="1" Margin="6,0,0,0">
+              <Border Classes="card" Margin="0" IsVisible="{Binding HasResult}">
+                <views:ResultView DataContext="{Binding Result}" />
+              </Border>
+              <Border Classes="card" Margin="0" IsVisible="{Binding !HasResult}">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6" MaxWidth="380">
+                  <TextBlock Text="Nessun calcolo" FontSize="14" FontWeight="SemiBold" Foreground="#e6edf3" HorizontalAlignment="Center" />
+                  <TextBlock Classes="muted" TextAlignment="Center" TextWrapping="Wrap"
+                             Text="Compila i dati a sinistra e premi «Calcola» per ottenere il prospetto dettagliato." />
+                </StackPanel>
+              </Border>
+            </Panel>
+          </Grid>
+        </Grid>
+      </TabItem>
+
+      <!-- ================= STORICO ================= -->
+      <TabItem Header="Storico">
+        <Grid RowDefinitions="Auto,*" Margin="24">
+          <Border Grid.Row="0" Classes="card">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Button Content="Aggiorna" Classes="secondary" Command="{Binding RefreshHistoryCommand}" />
+              <Button Content="Apri dettaglio" Classes="primary" Command="{Binding OpenHistoryDetailCommand}" CommandParameter="{Binding SelectedHistoryRow}" />
+              <Button Content="Elimina voce" Classes="secondary" Command="{Binding DeleteHistoryCommand}" CommandParameter="{Binding SelectedHistoryRow}" />
+              <Button Content="Svuota storico" Classes="secondary" Command="{Binding ClearHistoryCommand}" />
+            </StackPanel>
+          </Border>
+
+          <Border Grid.Row="1" Classes="card" Margin="0" Padding="4">
+            <DataGrid x:CompileBindings="False"
+                      ItemsSource="{Binding History}"
+                      SelectedItem="{Binding SelectedHistoryRow}"
+                      AutoGenerateColumns="False" IsReadOnly="True"
+                      HeadersVisibility="Column">
+              <DataGrid.Columns>
+                <DataGridTextColumn Header="Data" Binding="{Binding CreatedText}" Width="140" />
+                <DataGridTextColumn Header="Categoria" Binding="{Binding CategoryText}" Width="160" />
+                <DataGridTextColumn Header="Anno" Binding="{Binding YearText}" Width="60" />
+                <DataGridTextColumn Header="Profilo" Binding="{Binding ProfileName}" Width="150" />
+                <DataGridTextColumn Header="Lordo" Binding="{Binding GrossText}" Width="120" />
+                <DataGridTextColumn Header="Imposte" Binding="{Binding TaxesText}" Width="120" />
+                <DataGridTextColumn Header="Netto" Binding="{Binding NetText}" Width="120" />
+                <DataGridTextColumn Header="Pressione" Binding="{Binding RateText}" Width="100" />
+              </DataGrid.Columns>
+            </DataGrid>
+          </Border>
+        </Grid>
+      </TabItem>
+
+      <!-- ================= PROFILI ================= -->
+      <TabItem Header="Profili">
+        <Grid ColumnDefinitions="*,Auto" Margin="24">
+          <Border Grid.Column="0" Classes="card" Margin="0,0,12,0">
+            <ListBox ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedProfile}"
+                     Background="Transparent" BorderThickness="0">
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="models:SavedProfile">
+                  <StackPanel Margin="0,3">
+                    <TextBlock Classes="fieldLabel" Text="{Binding Name}" />
+                    <TextBlock Classes="muted" Text="{Binding Category, Converter={StaticResource EnumLabel}}" />
+                  </StackPanel>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </Border>
+
+          <StackPanel Grid.Column="1" Width="190" Spacing="8">
+            <Button Content="Carica" Classes="primary" HorizontalAlignment="Stretch" Command="{Binding LoadProfileCommand}" CommandParameter="{Binding SelectedProfile}" />
+            <Button Content="Elimina" Classes="secondary" HorizontalAlignment="Stretch" Command="{Binding DeleteProfileCommand}" CommandParameter="{Binding SelectedProfile}" />
+            <Button Content="Nuovo" Classes="secondary" HorizontalAlignment="Stretch" Command="{Binding NewProfileCommand}" />
+            <TextBlock Classes="muted" Text="File profili su disco:" Margin="0,16,0,0" />
+            <TextBlock Classes="muted" Text="{Binding ProfilesPath}" TextWrapping="Wrap" />
+          </StackPanel>
+        </Grid>
+      </TabItem>
+
+      <!-- ================= INFORMAZIONI ================= -->
+      <TabItem Header="Informazioni">
+        <ScrollViewer Margin="24">
+          <StackPanel Spacing="0" MaxWidth="820" HorizontalAlignment="Left">
+            <Border Classes="card">
+              <StackPanel Spacing="8">
+                <TextBlock Classes="sectionTitle" Text="TaxManager" />
+                <TextBlock Classes="body" TextWrapping="Wrap" Text="Stima delle imposte annue in Italia per lavoratori dipendenti (pubblici e privati) e titolari di Partita IVA in regime forfettario." />
+              </StackPanel>
+            </Border>
+            <Border Classes="card">
+              <StackPanel Spacing="8">
+                <TextBlock Classes="cardTitle" Text="Come funziona" />
+                <TextBlock Classes="body" TextWrapping="Wrap" Text="Le regole fiscali sono dati versionati per anno (JSON). Il motore applica IRPEF a scaglioni, detrazioni da lavoro, addizionali regionali/comunali (per regione, provincia e comune, dati MEF) e — dal 2025 — il cuneo fiscale; per il forfettario applica coefficiente di redditività, contributi deducibili e imposta sostitutiva." />
+                <TextBlock Classes="cardTitle" Text="Persistenza" Margin="0,6,0,0" />
+                <TextBlock Classes="body" TextWrapping="Wrap" Text="Lo storico dei calcoli è in un database SQLite; i profili contribuente sono su disco in JSON. Ogni prospetto è esportabile in TXT o JSON." />
+              </StackPanel>
+            </Border>
+            <Border Classes="warning">
+              <TextBlock Classes="warningText" TextWrapping="Wrap"
+                         Text="AVVISO: i risultati sono una STIMA semplificata e non sostituiscono il calcolo di un commercialista o del CAF. Verificare sempre aliquote e soglie sulle fonti ufficiali (Agenzia delle Entrate, INPS, MEF) per l'anno di riferimento." />
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+    </TabControl>
+  </DockPanel>
+</Window>

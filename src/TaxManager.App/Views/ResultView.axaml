@@ -1,0 +1,73 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:TaxManager.App.ViewModels"
+             mc:Ignorable="d"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             x:Class="TaxManager.App.Views.ResultView"
+             x:DataType="vm:ResultViewModel">
+
+  <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+    <TextBlock Grid.Row="0" Classes="sectionTitle" Text="{Binding Title}" Margin="0,0,0,12" />
+
+    <!-- Cartoline riepilogo (KPI) -->
+    <UniformGrid Grid.Row="1" Columns="4" Margin="0,0,0,12">
+      <Border Classes="statCard" Margin="3,0">
+        <StackPanel Spacing="4">
+          <TextBlock Classes="muted" Text="Netto annuo" />
+          <TextBlock Text="{Binding NetIncomeText}" FontSize="17" FontWeight="Bold" Foreground="#3fb950" />
+        </StackPanel>
+      </Border>
+      <Border Classes="statCard" Margin="3,0">
+        <StackPanel Spacing="4">
+          <TextBlock Classes="muted" Text="Imposte totali" />
+          <TextBlock Text="{Binding TotalTaxesText}" FontSize="17" FontWeight="Bold" Foreground="#f85149" />
+        </StackPanel>
+      </Border>
+      <Border Classes="statCard" Margin="3,0">
+        <StackPanel Spacing="4">
+          <TextBlock Classes="muted" Text="Contributi" />
+          <TextBlock Text="{Binding ContributionsText}" FontSize="17" FontWeight="Bold" Foreground="#d29922" />
+        </StackPanel>
+      </Border>
+      <Border Classes="statCard" Margin="3,0">
+        <StackPanel Spacing="4">
+          <TextBlock Classes="muted" Text="Pressione fiscale" />
+          <TextBlock Text="{Binding EffectiveRateText}" FontSize="17" FontWeight="Bold" Foreground="#58a6ff" />
+        </StackPanel>
+      </Border>
+    </UniformGrid>
+
+    <!-- Prospetto dettagliato -->
+    <Border Grid.Row="2" Classes="card" Margin="0" Padding="4">
+      <DataGrid x:CompileBindings="False"
+                ItemsSource="{Binding Lines}"
+                AutoGenerateColumns="False"
+                IsReadOnly="True"
+                HeadersVisibility="Column"
+                CanUserResizeColumns="True">
+        <DataGrid.Columns>
+          <DataGridTextColumn Header="Voce" Binding="{Binding Label}" Width="*" />
+          <DataGridTextColumn Header="Importo" Binding="{Binding Amount}" Width="170" />
+        </DataGrid.Columns>
+      </DataGrid>
+    </Border>
+
+    <!-- Note -->
+    <Border Grid.Row="3" Classes="altPanel" Margin="0,12,0,0" Padding="12">
+      <StackPanel Spacing="4">
+        <TextBlock Classes="cardTitle" Text="Note" Margin="0,0,0,4" />
+        <ItemsControl ItemsSource="{Binding Notes}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <TextBlock Text="{Binding}" TextWrapping="Wrap" Classes="muted" Margin="0,1" />
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </Border>
+
+  </Grid>
+
+</UserControl>

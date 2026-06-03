@@ -1,0 +1,121 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:TaxManager.App.ViewModels"
+             mc:Ignorable="d"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             x:Class="TaxManager.App.Views.EmployeeFormView"
+             x:DataType="vm:EmployeeFormViewModel">
+
+  <StackPanel Spacing="14">
+    <TextBlock Classes="sectionTitle" Text="Dati lavoratore dipendente" />
+
+    <StackPanel Spacing="6">
+      <TextBlock Classes="fieldLabel" Text="Reddito lordo" />
+      <ToggleSwitch IsChecked="{Binding UseMonthlyInput}" OffContent="RAL annua" OnContent="Lordo mensile" />
+
+      <StackPanel Spacing="3" IsVisible="{Binding !UseMonthlyInput}">
+        <TextBlock Classes="fieldLabel" Text="Reddito annuo lordo — RAL (€)" />
+        <NumericUpDown Value="{Binding GrossAnnualSalary}" Minimum="0" Increment="1000" FormatString="C2" />
+      </StackPanel>
+
+      <StackPanel Spacing="3" IsVisible="{Binding UseMonthlyInput}">
+        <TextBlock Classes="fieldLabel" Text="Lordo mensile (€)" />
+        <NumericUpDown Value="{Binding MonthlyGross}" Minimum="0" Increment="100" FormatString="C2" />
+        <TextBlock Classes="fieldLabel" Text="Numero mensilità" Margin="0,4,0,0" />
+        <ComboBox x:CompileBindings="False" ItemsSource="{Binding MensilitaOptions}" SelectedItem="{Binding Mensilita}" HorizontalAlignment="Stretch" />
+        <TextBlock Classes="muted" Text="{Binding AnnualDerivedText}" />
+        <TextBlock Classes="muted" TextWrapping="Wrap"
+                   Text="Inserisci il lordo di UNA mensilità ordinaria: con 13/14 mensilità è la RAL ripartita, non lo stipendio + extra. Variabili (straordinari, premi, fringe) e anno parziale non sono inclusi." />
+      </StackPanel>
+    </StackPanel>
+
+    <StackPanel Spacing="6">
+      <TextBlock Classes="fieldLabel" Text="Giorni di lavoro nell'anno" />
+      <NumericUpDown Value="{Binding EmploymentDays}" Minimum="0" Maximum="365" Increment="1" FormatString="N0" />
+    </StackPanel>
+
+    <TextBlock Classes="cardTitle" Text="Residenza (determina le addizionali)" />
+
+    <StackPanel Spacing="6">
+      <TextBlock Classes="fieldLabel" Text="Regione" />
+      <AutoCompleteBox x:CompileBindings="False"
+                       ItemsSource="{Binding Regions}"
+                       SelectedItem="{Binding SelectedRegion}"
+                       ValueMemberBinding="{Binding Region}"
+                       FilterMode="Contains"
+                       MinimumPrefixLength="0"
+                       MaxDropDownHeight="320"
+                       Watermark="Digita la regione…"
+                       LostFocus="OnSearchLostFocus"
+                       HorizontalAlignment="Stretch">
+        <AutoCompleteBox.ItemTemplate>
+          <DataTemplate><TextBlock Text="{Binding Region}" /></DataTemplate>
+        </AutoCompleteBox.ItemTemplate>
+      </AutoCompleteBox>
+      <TextBlock Classes="muted" Text="{Binding RegionalRateText, StringFormat='Addizionale regionale: {0}'}" />
+    </StackPanel>
+
+    <StackPanel Spacing="6">
+      <TextBlock Classes="fieldLabel" Text="Provincia" />
+      <AutoCompleteBox x:CompileBindings="False"
+                       ItemsSource="{Binding Provinces}"
+                       SelectedItem="{Binding SelectedProvince}"
+                       FilterMode="Contains"
+                       MinimumPrefixLength="0"
+                       MaxDropDownHeight="320"
+                       Watermark="Digita la provincia…"
+                       LostFocus="OnSearchLostFocus"
+                       HorizontalAlignment="Stretch" />
+    </StackPanel>
+
+    <StackPanel Spacing="6">
+      <TextBlock Classes="fieldLabel" Text="Comune" />
+      <AutoCompleteBox x:CompileBindings="False"
+                       ItemsSource="{Binding Municipalities}"
+                       SelectedItem="{Binding SelectedMunicipality}"
+                       ValueMemberBinding="{Binding Name}"
+                       FilterMode="Contains"
+                       MinimumPrefixLength="1"
+                       MaxDropDownHeight="320"
+                       Watermark="Digita il nome del comune…"
+                       LostFocus="OnSearchLostFocus"
+                       HorizontalAlignment="Stretch">
+        <AutoCompleteBox.ItemTemplate>
+          <DataTemplate><TextBlock Text="{Binding Name}" /></DataTemplate>
+        </AutoCompleteBox.ItemTemplate>
+      </AutoCompleteBox>
+      <TextBlock Classes="muted" Text="{Binding MunicipalRateText, StringFormat='Addizionale comunale: {0}'}" />
+    </StackPanel>
+
+    <StackPanel Spacing="6" IsVisible="{Binding IsManualMunicipality}">
+      <TextBlock Classes="fieldLabel" Text="Aliquota comunale manuale (%)" />
+      <NumericUpDown Value="{Binding ManualMunicipalPercent}" Minimum="0" Maximum="1" Increment="0.01" FormatString="N2" />
+    </StackPanel>
+
+    <StackPanel Spacing="6">
+      <TextBlock Classes="fieldLabel" Text="Previdenza complementare (€)" />
+      <NumericUpDown Value="{Binding PensionContribution}" Minimum="0" Increment="100" FormatString="C2" />
+      <TextBlock Classes="muted" TextWrapping="Wrap"
+                 Text="Versamenti a fondi pensione/PIP: deducibili dal reddito fino a € 5.164,57/anno (contributi tuoi + del datore; il TFR conferito non conta)." />
+    </StackPanel>
+
+    <StackPanel Spacing="6">
+      <TextBlock Classes="fieldLabel" Text="Altri oneri deducibili (€)" />
+      <NumericUpDown Value="{Binding DeductibleCharges}" Minimum="0" Increment="100" FormatString="C2" />
+      <TextBlock Classes="muted" TextWrapping="Wrap"
+                 Text="Spese che riducono il reddito imponibile (es. contributi colf/badanti, assegno all'ex coniuge). Inserisci l'importo della spesa." />
+    </StackPanel>
+
+    <StackPanel Spacing="6">
+      <TextBlock Classes="fieldLabel" Text="Altre detrazioni d'imposta (€)" />
+      <NumericUpDown Value="{Binding OtherTaxCredits}" Minimum="0" Increment="100" FormatString="C2" />
+      <TextBlock Classes="muted" TextWrapping="Wrap"
+                 Text="Importo della detrazione GIÀ calcolata da sottrarre dall'imposta (es. 19% delle spese mediche oltre €129,11, interessi mutuo…), non la spesa lorda." />
+    </StackPanel>
+
+    <TextBlock Classes="muted" TextWrapping="Wrap"
+               Text="Addizionali ricavate da regione/provincia/comune (dati MEF), con scaglioni e soglie di esenzione applicati automaticamente. Comune non in elenco: scegli «Altro comune» e inserisci l'aliquota." />
+  </StackPanel>
+
+</UserControl>

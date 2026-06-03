@@ -1,0 +1,16 @@
+<Project>
+
+  <!-- Proprietà comuni a TUTTI i progetti della soluzione TaxManager.
+       I singoli .csproj restano così minimali e coerenti. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Deterministic>true</Deterministic>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- NB: NON abilitiamo InvariantGlobalization: l'app formatta importi e date
+         in cultura it-IT (€, separatori). -->
+  </PropertyGroup>
+
+</Project>

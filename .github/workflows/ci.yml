@@ -1,0 +1,59 @@
+name: CI - .NET Build & Test
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'data/**'
+      - '*.slnx'
+      - 'Directory.*.props'
+  pull_request:
+    branches:
+      - develop
+      - main
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'data/**'
+      - '*.slnx'
+      - 'Directory.*.props'
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  build-and-test:
+    name: Build & Test (.NET 10.0)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up .NET 10.0
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore TaxManager.slnx
+
+      - name: Build solution (Release)
+        run: dotnet build TaxManager.slnx --configuration Release --no-restore
+
+      - name: Run unit tests
+        run: dotnet test TaxManager.slnx --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: test-results-windows
+          path: '**/test-results.trx'

@@ -1,0 +1,38 @@
+<Project>
+
+  <!-- Central Package Management: tutte le versioni dei pacchetti vivono qui. -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- UI: Avalonia 11.3 (linea matura, ecosistema allineato) -->
+    <PackageVersion Include="Avalonia" Version="11.3.17" />
+    <PackageVersion Include="Avalonia.Desktop" Version="11.3.17" />
+    <PackageVersion Include="Avalonia.Themes.Fluent" Version="11.3.17" />
+    <PackageVersion Include="Avalonia.Fonts.Inter" Version="11.3.17" />
+    <PackageVersion Include="Avalonia.Controls.DataGrid" Version="11.3.13" />
+    <PackageVersion Include="Avalonia.Diagnostics" Version="11.3.17" />
+
+    <!-- MVVM -->
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+
+    <!-- Generazione icona (solo tool tools/IconGenerator) -->
+    <PackageVersion Include="SkiaSharp" Version="2.88.9" />
+
+    <!-- Persistenza relazionale -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.8" />
+
+    <!-- DI -->
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.8" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.8" />
+
+    <!-- Test -->
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+  </ItemGroup>
+
+</Project>

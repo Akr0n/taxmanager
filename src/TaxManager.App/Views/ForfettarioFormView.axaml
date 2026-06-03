@@ -1,0 +1,63 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:TaxManager.App.ViewModels"
+             xmlns:rules="clr-namespace:TaxManager.Domain.Rules;assembly=TaxManager.Domain"
+             mc:Ignorable="d"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             x:Class="TaxManager.App.Views.ForfettarioFormView"
+             x:DataType="vm:ForfettarioFormViewModel">
+
+  <StackPanel Spacing="14">
+    <TextBlock Classes="sectionTitle" Text="Dati regime forfettario" />
+
+    <StackPanel Spacing="6">
+      <TextBlock Classes="fieldLabel" Text="Ricavi / compensi (€)" />
+      <NumericUpDown Value="{Binding Revenue}" Minimum="0" Increment="1000" FormatString="C2" />
+    </StackPanel>
+
+    <StackPanel Spacing="6">
+      <TextBlock Classes="fieldLabel" Text="Settore (coefficiente di redditività)" />
+      <ComboBox x:CompileBindings="False"
+                ItemsSource="{Binding Coefficients}"
+                SelectedItem="{Binding SelectedCoefficient}"
+                HorizontalAlignment="Stretch" MaxDropDownHeight="320">
+        <ComboBox.ItemTemplate>
+          <DataTemplate x:DataType="rules:ForfettarioCoefficient">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBlock Classes="accent" Text="{Binding Coefficient, StringFormat='{}{0:P0}'}" FontWeight="SemiBold" Width="44" />
+              <TextBlock Text="{Binding Sector}" TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+    </StackPanel>
+
+    <CheckBox Content="Nuova attività (aliquota ridotta 5%, primi 5 anni)" IsChecked="{Binding IsStartup}" />
+
+    <StackPanel Spacing="6">
+      <TextBlock Classes="fieldLabel" Text="Gestione previdenziale" />
+      <ComboBox x:CompileBindings="False"
+                ItemsSource="{Binding Schemes}"
+                SelectedItem="{Binding Scheme}"
+                HorizontalAlignment="Stretch">
+        <ComboBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding Converter={StaticResource EnumLabel}}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+    </StackPanel>
+
+    <CheckBox Content="Riduzione contributiva 35% (artigiani/commercianti forfettari)" IsChecked="{Binding ApplyReduction}" />
+
+    <StackPanel Spacing="6">
+      <TextBlock Classes="fieldLabel" Text="Aliquota cassa professionale (%) — solo se «Cassa professionale»" />
+      <NumericUpDown Value="{Binding CassaPercent}" Minimum="0" Maximum="30" Increment="0.5" FormatString="N2" />
+    </StackPanel>
+
+    <TextBlock Classes="muted" TextWrapping="Wrap"
+               Text="Nel forfettario non si applicano IRPEF, addizionali e IVA: l'imposta sostitutiva sostituisce l'IRPEF." />
+  </StackPanel>
+
+</UserControl>

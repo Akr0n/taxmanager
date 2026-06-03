@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Strumento di importazione dati (NON incluso in TaxManager.slnx).
+       Genera data/addizionali/comuni-ANNO.json unendo l'elenco comuni
+       (tools/comuni-raw.json) con le aliquote MEF (tools/mef-ANNO.csv).
+       Esecuzione: dotnet run dal progetto tools/AddizionaliImporter -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+</Project>

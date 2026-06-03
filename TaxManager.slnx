@@ -1,6 +1,9 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/TaxManager.Domain/TaxManager.Domain.csproj" />
+    <Project Path="src/TaxManager.Application/TaxManager.Application.csproj" />
+    <Project Path="src/TaxManager.Infrastructure/TaxManager.Infrastructure.csproj" />
+    <Project Path="src/TaxManager.App/TaxManager.App.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/TaxManager.Domain.Tests/TaxManager.Domain.Tests.csproj" />

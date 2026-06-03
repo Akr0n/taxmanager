@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Genera src/TaxManager.App/Assets/logo.ico (multi-size) e logo.png con SkiaSharp.
+       NON incluso in TaxManager.slnx. Esecuzione: dotnet run dal progetto tools/IconGenerator -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SkiaSharp" />
+  </ItemGroup>
+
+</Project>
