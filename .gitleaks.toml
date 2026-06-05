@@ -1,0 +1,15 @@
+# Configurazione gitleaks per TaxManager.
+# Usata dall'hook locale (.githooks/pre-commit) e dalla CI (.github/workflows/secret-scan.yml).
+
+# Estende il set di regole predefinito di gitleaks (raccomandato): token cloud (AWS/GCP/Azure),
+# PAT GitHub/GitLab, chiavi private PEM, JWT, password in connection string, ecc.
+[extend]
+useDefault = true
+
+# --- Allowlist ---------------------------------------------------------------------------
+# Inserire qui SOLO falsi positivi verificati. NON usare per nascondere segreti reali.
+[[allowlists]]
+description = "Placeholder dei workflow GitHub Actions (token iniettati a runtime, non valori reali)"
+regexes = [
+  '''\$\{\{\s*secrets\.[A-Za-z_][A-Za-z0-9_]*\s*\}\}''',
+]

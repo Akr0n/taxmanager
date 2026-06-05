@@ -1,0 +1,4 @@
+# Gli hook git e gli script shell devono avere line ending LF anche su Windows,
+# altrimenti sh fallisce con errori del tipo "\r: command not found".
+.githooks/** text eol=lf
+*.sh text eol=lf

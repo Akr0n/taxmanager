@@ -1,0 +1,28 @@
+#!/bin/sh
+# Pre-commit hook: blocca l'inserimento accidentale di segreti analizzando con gitleaks
+# SOLO le modifiche in stage (veloce). E' la prima linea di difesa, locale; la rete di
+# sicurezza lato server e' il workflow .github/workflows/secret-scan.yml.
+#
+# Attivazione (una tantum):
+#   git config core.hooksPath .githooks
+#
+# Richiede gitleaks nel PATH:
+#   Windows : winget install Gitleaks.Gitleaks   (poi riapri il terminale)
+#   macOS   : brew install gitleaks
+#   Linux   : https://github.com/gitleaks/gitleaks/releases
+
+if command -v gitleaks >/dev/null 2>&1; then
+    gitleaks git --staged --no-banner --redact
+    if [ $? -ne 0 ]; then
+        echo ""
+        echo "X gitleaks: potenziale SEGRETO nelle modifiche in stage — commit ANNULLATO."
+        echo "  - Togli il valore dal codice e usa variabili d'ambiente / GitHub Secrets."
+        echo "  - Falso positivo? Aggiungi una regola di allowlist in .gitleaks.toml."
+        echo "  - Bypass consapevole (sconsigliato): git commit --no-verify"
+        exit 1
+    fi
+else
+    echo "AVVISO: gitleaks non nel PATH -> scansione pre-commit SALTATA."
+    echo "        Installa con:  winget install Gitleaks.Gitleaks  (poi riapri il terminale)"
+fi
+exit 0
