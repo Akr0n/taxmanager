@@ -46,7 +46,7 @@
                        FilterMode="Contains"
                        MinimumPrefixLength="0"
                        MaxDropDownHeight="320"
-                       Watermark="Digita la regione…"
+                       PlaceholderText="Digita la regione…"
                        LostFocus="OnSearchLostFocus"
                        HorizontalAlignment="Stretch">
         <AutoCompleteBox.ItemTemplate>
@@ -64,7 +64,7 @@
                        FilterMode="Contains"
                        MinimumPrefixLength="0"
                        MaxDropDownHeight="320"
-                       Watermark="Digita la provincia…"
+                       PlaceholderText="Digita la provincia…"
                        LostFocus="OnSearchLostFocus"
                        HorizontalAlignment="Stretch" />
     </StackPanel>
@@ -78,7 +78,7 @@
                        FilterMode="Contains"
                        MinimumPrefixLength="1"
                        MaxDropDownHeight="320"
-                       Watermark="Digita il nome del comune…"
+                       PlaceholderText="Digita il nome del comune…"
                        LostFocus="OnSearchLostFocus"
                        HorizontalAlignment="Stretch">
         <AutoCompleteBox.ItemTemplate>

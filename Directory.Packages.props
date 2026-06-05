@@ -7,19 +7,25 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- UI: Avalonia 11.3 (linea matura, ecosistema allineato) -->
-    <PackageVersion Include="Avalonia" Version="12.0.0" />
-    <PackageVersion Include="Avalonia.Desktop" Version="11.3.17" />
-    <PackageVersion Include="Avalonia.Themes.Fluent" Version="11.3.17" />
-    <PackageVersion Include="Avalonia.Fonts.Inter" Version="11.3.17" />
+    <!-- UI: Avalonia 12.0 (linea corrente). Famiglia core allineata a 12.0.4.
+         I due pacchetti "indietro" sono VOLUTI, non un disallineamento da correggere:
+         - Avalonia.Controls.DataGrid: l'ultima pubblicata su NuGet e' 12.0.0 (niente 12.0.1-4);
+           dipende da Avalonia >= 12.0.0, quindi convive con il core 12.0.4.
+         - Avalonia.Diagnostics: non esiste una 12.x; resta a 11.3.17 ed e' referenziato
+           SOLO in Debug (DevTools). Dipende da Avalonia >= 11.3.17, quindi non confligge col core 12.x. -->
+    <PackageVersion Include="Avalonia" Version="12.0.4" />
+    <PackageVersion Include="Avalonia.Desktop" Version="12.0.4" />
+    <PackageVersion Include="Avalonia.Themes.Fluent" Version="12.0.4" />
+    <PackageVersion Include="Avalonia.Fonts.Inter" Version="12.0.4" />
     <PackageVersion Include="Avalonia.Controls.DataGrid" Version="12.0.0" />
     <PackageVersion Include="Avalonia.Diagnostics" Version="11.3.17" />
 
     <!-- MVVM -->
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
 
-    <!-- Generazione icona (solo tool tools/IconGenerator) -->
-    <PackageVersion Include="SkiaSharp" Version="2.88.9" />
+    <!-- SkiaSharp 3.119.4: richiesto da Avalonia.Skia 12 (>= 3.119.4) e usato anche da
+         tools/IconGenerator (migrato alle API testo 3.x basate su SKFont). Versione unica per tutto il repo. -->
+    <PackageVersion Include="SkiaSharp" Version="3.119.4" />
 
     <!-- Persistenza relazionale -->
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.8" />

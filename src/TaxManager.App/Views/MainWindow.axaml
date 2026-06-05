@@ -57,7 +57,7 @@
 
               <StackPanel Spacing="6">
                 <TextBlock Classes="fieldLabel" Text="Nome profilo (per salvataggio/storico)" />
-                <TextBox Width="240" Text="{Binding ProfileName}" Watermark="es. Mario Rossi 2025" />
+                <TextBox Width="240" Text="{Binding ProfileName}" PlaceholderText="es. Mario Rossi 2025" />
               </StackPanel>
 
               <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom">

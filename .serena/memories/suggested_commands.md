@@ -11,7 +11,7 @@ Dalla root `D:\_repositories\taxmanager`:
 
 Note Windows:
 - Dati utente in `%APPDATA%\TaxManager` (DB SQLite + profiles.json). Reset: `Remove-Item "$env:APPDATA\TaxManager" -Recurse -Force`.
-- I tool in `tools/` NON sono in `TaxManager.slnx`; SkiaSharp è pinnato in `Directory.Packages.props` (>=2.88.9 per compatibilità con Avalonia.Skia).
+- I tool in `tools/` NON sono in `TaxManager.slnx`; SkiaSharp è pinnato in `Directory.Packages.props` a 3.119.4 (richiesto da Avalonia.Skia 12) e usato anche da `tools/IconGenerator`, migrato alle API testo 3.x (SKFont). Versione unica per tutto il repo.
 - Per buildare l'app va CHIUSA l'istanza in esecuzione (il file `.exe` resta bloccato): `Get-Process TaxManager | Stop-Process -Force`.
 - Versioni NuGet: NuGet flat-container API.
 - GIT: lo gestisce l'UTENTE — NON eseguire comandi git. Branch di sviluppo: `develop`.

@@ -74,19 +74,22 @@ void DrawLogo(SKCanvas c, int size)
     // Glifo € (Segoe UI Bold, presente su Windows; fallback al default).
     var tf = SKTypeface.FromFamilyName("Segoe UI", SKFontStyleWeight.Bold, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright)
              ?? SKTypeface.Default;
+    // SkiaSharp 3.x: lo stile del testo (typeface, dimensione, allineamento) vive su SKFont,
+    // non più su SKPaint (TextSize/Typeface/TextAlign rimossi in 3.0).
+    using var font = new SKFont(tf, s * 0.6f);
     if (depth)
-        using (var shadow = new SKPaint { IsAntialias = true, Color = SKColor.Parse("#1158c7"), Typeface = tf, TextSize = s * 0.6f, TextAlign = SKTextAlign.Left })
-            DrawCentered(c, "€", rect, shadow, 0f, s * 0.02f);
+        using (var shadow = new SKPaint { IsAntialias = true, Color = SKColor.Parse("#1158c7") })
+            DrawCentered(c, "€", rect, font, shadow, 0f, s * 0.02f);
 
-    using (var glyph = new SKPaint { IsAntialias = true, Color = SKColors.White, Typeface = tf, TextSize = s * 0.6f, TextAlign = SKTextAlign.Left })
-        DrawCentered(c, "€", rect, glyph, 0f, 0f);
+    using (var glyph = new SKPaint { IsAntialias = true, Color = SKColors.White })
+        DrawCentered(c, "€", rect, font, glyph, 0f, 0f);
 }
 
-void DrawCentered(SKCanvas c, string text, SKRect rect, SKPaint paint, float dx, float dy)
+void DrawCentered(SKCanvas c, string text, SKRect rect, SKFont font, SKPaint paint, float dx, float dy)
 {
-    var b = new SKRect();
-    paint.MeasureText(text, ref b);
-    c.DrawText(text, rect.MidX - b.MidX + dx, rect.MidY - b.MidY + dy, paint);
+    // Skia 3.x: misura e disegno passano per SKFont; l'allineamento è argomento di DrawText.
+    font.MeasureText(text, out var b, paint);
+    c.DrawText(text, rect.MidX - b.MidX + dx, rect.MidY - b.MidY + dy, SKTextAlign.Left, font, paint);
 }
 
 void WriteIco(string path, IReadOnlyList<(int size, byte[] png)> images)
