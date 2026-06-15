@@ -34,15 +34,23 @@ public sealed class EmploymentTaxCalculator : ITaxCalculator<EmploymentIncomeInp
         var detrazioniTotali = detrazioneLavoro + ulterioreDetrazione + otherCredits;
         var netIrpef = Money.Euro(Math.Max(grossTax - detrazioniTotali, 0m));
 
+        // Le addizionali regionale/comunale sono dovute solo se per l'anno risulta dovuta l'IRPEF
+        // (imposta netta > 0). In incapienza totale non si versano (D.Lgs. 360/1998, D.Lgs. 446/1997).
+        var irpefDovuta = netIrpef > 0m;
+
         // Addizionale regionale: tariffa a scaglioni (risolta dalla regione) se presente, altrimenti aliquota flat.
-        var regionalRaw = input.RegionalSurtaxSchedule is { } regSchedule
-            ? regSchedule.ComputeTax(taxable)
-            : taxable * Math.Max(input.RegionalSurtaxRate, 0m);
+        var regionalRaw = !irpefDovuta
+            ? 0m
+            : input.RegionalSurtaxSchedule is { } regSchedule
+                ? regSchedule.ComputeTax(taxable)
+                : taxable * Math.Max(input.RegionalSurtaxRate, 0m);
         var regional = Money.Euro(regionalRaw);
 
-        // Addizionale comunale: nulla sotto la soglia di esenzione; altrimenti tariffa a scaglioni o aliquota flat.
+        // Addizionale comunale: nulla in incapienza o sotto la soglia di esenzione; altrimenti scaglioni o aliquota flat.
         decimal municipalRaw;
-        if (input.MunicipalExemptionThreshold > 0m && taxable <= input.MunicipalExemptionThreshold)
+        if (!irpefDovuta)
+            municipalRaw = 0m;
+        else if (input.MunicipalExemptionThreshold > 0m && taxable <= input.MunicipalExemptionThreshold)
             municipalRaw = 0m;
         else if (input.MunicipalSurtaxSchedule is { } munSchedule)
             municipalRaw = munSchedule.ComputeTax(taxable);
@@ -50,7 +58,13 @@ public sealed class EmploymentTaxCalculator : ITaxCalculator<EmploymentIncomeInp
             municipalRaw = taxable * Math.Max(input.MunicipalSurtaxRate, 0m);
         var municipal = Money.Euro(municipalRaw);
 
-        var trattamento = ruleset.TreatmentBonus?.Compute(taxable, input.EmploymentDays) ?? 0m;
+        // Trattamento integrativo (primo binario, reddito ≤ soglia): spetta solo in CAPIENZA, ossia se
+        // l'IRPEF lorda supera la detrazione da lavoro dipendente (art. 1 DL 3/2020, confermato L. 207/2024).
+        var capienzaTrattamento = grossTax > detrazioneLavoro;
+        var trattamento = capienzaTrattamento
+            ? (ruleset.TreatmentBonus?.Compute(taxable, input.EmploymentDays) ?? 0m)
+            : 0m;
+        // La somma integrativa del cuneo NON è una detrazione: è erogata a prescindere dalla capienza IRPEF.
         var sommaIntegrativa = ruleset.IntegrativeAllowance?.Compute(taxable, input.EmploymentDays) ?? 0m;
         var bonus = Money.Euro(trattamento + sommaIntegrativa);
 
@@ -96,6 +110,11 @@ public sealed class EmploymentTaxCalculator : ITaxCalculator<EmploymentIncomeInp
             notes.Add($"Previdenza complementare: dedotto il massimo annuo (€{ruleset.ComplementaryPensionCap:N2}); l'eccedenza non è deducibile.");
         if (ruleset.TreatmentBonus is not null && trattamento == 0 && taxable > ruleset.TreatmentBonus.IncomeThreshold)
             notes.Add("Trattamento integrativo non spettante: reddito oltre la soglia prevista.");
+        if (ruleset.TreatmentBonus is not null && trattamento == 0 && taxable > 0
+            && taxable <= ruleset.TreatmentBonus.IncomeThreshold && !capienzaTrattamento)
+            notes.Add("Trattamento integrativo non spettante: IRPEF incapiente (imposta lorda ≤ detrazione da lavoro).");
+        if (!irpefDovuta && taxable > 0)
+            notes.Add("Addizionali regionale/comunale non dovute: IRPEF netta pari a zero (incapienza).");
         notes.Add("Stima annua semplificata: non considera conguagli, familiari a carico (assegno unico), esonero contributivo 2024 e altri crediti particolari.");
 
         return new TaxResult

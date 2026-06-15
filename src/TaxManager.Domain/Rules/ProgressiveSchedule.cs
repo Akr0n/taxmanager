@@ -28,11 +28,9 @@ public sealed record ProgressiveSchedule(IReadOnlyList<ProgressiveBracket> Brack
     /// <summary>Aliquota marginale applicabile al livello di reddito indicato.</summary>
     public decimal MarginalRate(decimal taxableIncome)
     {
-        decimal lower = 0m;
         foreach (var b in Brackets)
         {
             if (taxableIncome <= b.UpTo) return b.Rate;
-            lower = b.UpTo;
         }
         return Brackets.Count > 0 ? Brackets[^1].Rate : 0m;
     }

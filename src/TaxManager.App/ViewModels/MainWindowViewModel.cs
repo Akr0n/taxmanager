@@ -256,9 +256,18 @@ public partial class MainWindowViewModel : ObservableObject
     public async Task<bool> ExportAsync(string filePath, bool asJson)
     {
         if (_lastResult is null) return false;
-        if (asJson) await _exporter.ExportJsonAsync(_lastResult, filePath);
-        else await _exporter.ExportTextAsync(_lastResult, filePath);
-        StatusMessage = "Prospetto esportato: " + filePath;
-        return true;
+        try
+        {
+            if (asJson) await _exporter.ExportJsonAsync(_lastResult, filePath);
+            else await _exporter.ExportTextAsync(_lastResult, filePath);
+            StatusMessage = "Prospetto esportato: " + filePath;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            // Percorso non scrivibile / file bloccato / permessi: niente crash, mostra l'errore.
+            StatusMessage = "Errore nell'esportazione: " + ex.Message;
+            return false;
+        }
     }
 }
