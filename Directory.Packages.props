@@ -29,6 +29,11 @@
 
     <!-- Persistenza relazionale -->
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.8" />
+    <!-- Fix NU1903 (GHSA-2m69-gcr7-jv3q, gravità alta): EF Core 10 tira il nativo SQLite
+         SQLitePCLRaw.*_e_sqlite3 2.1.11 (vulnerabile). Con il transitive pinning attivo,
+         questi PackageVersion forzano la dipendenza transitiva alla 2.1.12 patchata. -->
+    <PackageVersion Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.12" />
+    <PackageVersion Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.12" />
 
     <!-- DI -->
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.8" />

@@ -484,6 +484,8 @@ $RECYCLE.BIN/
 # TaxManager publish/release outputs (rigenerati da publish.ps1 / dotnet publish)
 release/
 
-# Claude Code — versiona la config DI PROGETTO (.claude/settings.json, hooks/, agents/),
-# ma NON le impostazioni locali per-macchina (permessi personali, modello, ecc.)
-.claude/settings.local.json
+# Tooling AI locale — NON versionato (config, agenti, hook, indici, memorie)
+.claude/
+CLAUDE.md
+.codegraph/
+.serena/

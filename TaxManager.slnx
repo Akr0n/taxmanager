@@ -7,5 +7,6 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/TaxManager.Domain.Tests/TaxManager.Domain.Tests.csproj" />
+    <Project Path="tests/TaxManager.App.Tests/TaxManager.App.Tests.csproj" />
   </Folder>
 </Solution>

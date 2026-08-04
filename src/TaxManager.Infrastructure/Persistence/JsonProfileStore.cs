@@ -61,9 +61,18 @@ public sealed class JsonProfileStore : IProfileStore
     private async Task<List<SavedProfile>> LoadInternalAsync(CancellationToken ct)
     {
         if (!File.Exists(_path)) return new List<SavedProfile>();
-        await using var fs = File.OpenRead(_path);
-        var list = await JsonSerializer.DeserializeAsync<List<SavedProfile>>(fs, JsonOptions, ct);
-        return list ?? new List<SavedProfile>();
+        try
+        {
+            await using var fs = File.OpenRead(_path);
+            var list = await JsonSerializer.DeserializeAsync<List<SavedProfile>>(fs, JsonOptions, ct);
+            return list ?? new List<SavedProfile>();
+        }
+        catch (JsonException)
+        {
+            // File corrotto: degradazione sicura (lista vuota) invece di far crashare l'app,
+            // coerentemente con la tolleranza ai file malformati del caricatore ruleset.
+            return new List<SavedProfile>();
+        }
     }
 
     private async Task WriteInternalAsync(List<SavedProfile> list, CancellationToken ct)
@@ -72,9 +81,22 @@ public sealed class JsonProfileStore : IProfileStore
         if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
 
         var tmp = _path + ".tmp";
-        await using (var fs = File.Create(tmp))
-            await JsonSerializer.SerializeAsync(fs, list, JsonOptions, ct);
-        File.Copy(tmp, _path, overwrite: true);
-        File.Delete(tmp);
+        try
+        {
+            await using (var fs = File.Create(tmp))
+                await JsonSerializer.SerializeAsync(fs, list, JsonOptions, ct);
+            // Sostituzione ATOMICA: su NTFS (stesso volume) File.Move con overwrite è atomico,
+            // così un crash a metà scrittura non lascia mai profiles.json troncato/corrotto.
+            File.Move(tmp, _path, overwrite: true);
+        }
+        finally
+        {
+            // In caso di errore prima del Move, non lasciare orfano il file temporaneo.
+            if (File.Exists(tmp))
+            {
+                try { File.Delete(tmp); }
+                catch { /* best effort */ }
+            }
+        }
     }
 }
