@@ -14,8 +14,10 @@ public static class ProfileMapper
         EmploymentDays = p.EmploymentDays <= 0 ? 365 : p.EmploymentDays,
         RegionalSurtaxRate = p.RegionalSurtaxRate,
         MunicipalSurtaxRate = p.MunicipalSurtaxRate,
+        MunicipalExemptionThreshold = p.MunicipalExemptionThreshold,
         DeductibleCharges = p.DeductibleCharges,
         OtherTaxCredits = p.OtherTaxCredits,
+        ComplementaryPensionContribution = p.PensionContribution,
     };
 
     public static ForfettarioIncomeInput ToForfettario(SavedProfile p) => new()

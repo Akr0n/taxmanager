@@ -26,9 +26,15 @@ public static class ComputationRecordFactory
         ResultJson = JsonSerializer.Serialize(result, JsonOptions),
     };
 
-    /// <summary>Deserializza il prospetto completo salvato in <see cref="ComputationRecord.ResultJson"/>.</summary>
-    public static TaxResult? ReadResult(ComputationRecord record) =>
-        string.IsNullOrWhiteSpace(record.ResultJson)
-            ? null
-            : JsonSerializer.Deserialize<TaxResult>(record.ResultJson, JsonOptions);
+    /// <summary>
+    /// Deserializza il prospetto completo salvato in <see cref="ComputationRecord.ResultJson"/>.
+    /// Restituisce <c>null</c> anche se il JSON è corrotto, così una riga storico danneggiata
+    /// non fa crashare la visualizzazione del dettaglio (degradazione sicura).
+    /// </summary>
+    public static TaxResult? ReadResult(ComputationRecord record)
+    {
+        if (string.IsNullOrWhiteSpace(record.ResultJson)) return null;
+        try { return JsonSerializer.Deserialize<TaxResult>(record.ResultJson, JsonOptions); }
+        catch (JsonException) { return null; }
+    }
 }
