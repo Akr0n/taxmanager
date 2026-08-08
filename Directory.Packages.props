@@ -13,7 +13,7 @@
            dipende da Avalonia >= 12.0.0, quindi convive con il core 12.0.4.
          - Avalonia.Diagnostics: non esiste una 12.x; resta a 11.3.17 ed e' referenziato
            SOLO in Debug (DevTools). Dipende da Avalonia >= 11.3.17, quindi non confligge col core 12.x. -->
-    <PackageVersion Include="Avalonia" Version="12.0.5" />
+    <PackageVersion Include="Avalonia" Version="12.1.1" />
     <PackageVersion Include="Avalonia.Desktop" Version="12.0.5" />
     <PackageVersion Include="Avalonia.Themes.Fluent" Version="12.0.4" />
     <PackageVersion Include="Avalonia.Fonts.Inter" Version="12.0.4" />
