@@ -18,7 +18,7 @@
     <PackageVersion Include="Avalonia.Themes.Fluent" Version="12.0.4" />
     <PackageVersion Include="Avalonia.Fonts.Inter" Version="12.0.4" />
     <PackageVersion Include="Avalonia.Controls.DataGrid" Version="12.0.1" />
-    <PackageVersion Include="Avalonia.Diagnostics" Version="11.3.17" />
+    <PackageVersion Include="Avalonia.Diagnostics" Version="11.3.19" />
 
     <!-- MVVM -->
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
